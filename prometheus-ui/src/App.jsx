@@ -7,8 +7,12 @@ import Header from './components/Header'
 import StatusBar from './components/StatusBar'
 import Navigation from './components/Navigation'
 import DebugGrid from './components/DebugGrid'
+import { useViewportScale } from './hooks/useViewportScale'
 
 function App() {
+  // Viewport scaling for cross-device compatibility
+  const viewportScale = useViewportScale()
+  
   // Separate login state from page navigation
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentPage, setCurrentPage] = useState('define')
@@ -62,11 +66,31 @@ function App() {
   // Render logged-in pages
   if (isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#0d0d0d] flex flex-col">
-        {/* Debug Grid Overlay */}
-        <DebugGrid isVisible={showGrid} />
-        
-        <Header courseLoaded={courseLoaded} />
+      <div 
+        style={{
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          overflow: 'hidden',
+          backgroundColor: '#0d0d0d'
+        }}
+      >
+        <div 
+          className="bg-[#0d0d0d] flex flex-col"
+          style={{
+            width: '1920px',
+            height: '1080px',
+            transform: `scale(${viewportScale})`,
+            transformOrigin: 'top center',
+            flexShrink: 0
+          }}
+        >
+          {/* Debug Grid Overlay */}
+          <DebugGrid isVisible={showGrid} scale={viewportScale} />
+          
+          <Header courseLoaded={courseLoaded} />
 
         {/* B9: Upper horizontal line - FULL WIDTH (no margins) */}
         <div 
@@ -125,19 +149,40 @@ function App() {
             <StatusBar courseLoaded={courseLoaded} />
           </div>
         )}
+        </div>
       </div>
     )
   }
 
   // Render Login page
   return (
-    <div className="min-h-screen bg-prometheus-dark relative overflow-hidden">
-      {/* Debug Grid Overlay - also available on login page */}
-      <DebugGrid isVisible={showGrid} />
-      
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0d0d0d] via-[#111111] to-[#0a0a0a]" />
-      
-      <div className="relative z-10 min-h-screen p-[3%]">
+    <div 
+      style={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        overflow: 'hidden',
+        backgroundColor: '#0d0d0d'
+      }}
+    >
+      <div 
+        className="bg-prometheus-dark relative"
+        style={{
+          width: '1920px',
+          height: '1080px',
+          transform: `scale(${viewportScale})`,
+          transformOrigin: 'top center',
+          flexShrink: 0
+        }}
+      >
+        {/* Debug Grid Overlay - also available on login page */}
+        <DebugGrid isVisible={showGrid} scale={viewportScale} />
+        
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0d0d0d] via-[#111111] to-[#0a0a0a]" />
+        
+        <div className="relative z-10 min-h-screen p-[3%]">
         
         <div className="flex items-center gap-5 pt-[2%]">
           <img 

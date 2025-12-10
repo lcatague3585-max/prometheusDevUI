@@ -9,10 +9,11 @@
  * - Vertical gridlines every 95px (≈25mm) from center
  * - Horizontal gridlines every 95px from top
  * - Coordinate labels at key positions
+ * - Viewport scale factor display
  * - pointer-events: none (doesn't interfere with UI)
  */
 
-function DebugGrid({ isVisible }) {
+function DebugGrid({ isVisible, scale = 1 }) {
   if (!isVisible) return null
 
   // Grid spacing in pixels (≈25mm at 96 DPI)
@@ -143,7 +144,7 @@ function DebugGrid({ isVisible }) {
       {generateVerticalLines()}
       {generateHorizontalLines()}
 
-      {/* Grid indicator */}
+      {/* Grid indicator with scale factor */}
       <div 
         className="absolute top-2 right-2 px-2 py-1 rounded text-[10px] font-mono"
         style={{
@@ -152,7 +153,7 @@ function DebugGrid({ isVisible }) {
           border: '1px solid rgba(0, 255, 255, 0.4)'
         }}
       >
-        GRID: ON (Ctrl+G to toggle)
+        GRID: ON (Ctrl+G) | Scale: {(scale * 100).toFixed(0)}%
       </div>
 
       {/* Reference info */}

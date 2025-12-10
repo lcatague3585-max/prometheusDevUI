@@ -402,8 +402,8 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
 
         {/* Center section: < + > buttons and PKE Interface */}
         <div className="flex flex-col items-center justify-end h-full">
-          {/* < + > buttons - 6px above PKE window */}
-          <div className="flex items-center gap-4 text-[#767171] mb-[6px]">
+          {/* < + > buttons - 6px above PKE window, shifted 35px right to align with PKE */}
+          <div className="flex items-center gap-4 text-[#767171] mb-[6px]" style={{ marginLeft: '35px' }}>
             <button className="hover:text-[#f2f2f2] transition-colors text-xl">&lt;</button>
             <span className="text-sm">+</span>
             <button className="hover:text-[#f2f2f2] transition-colors text-xl">&gt;</button>

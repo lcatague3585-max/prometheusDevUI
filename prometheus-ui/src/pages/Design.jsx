@@ -91,14 +91,15 @@ function Design({ onNavigate, courseLoaded, setCourseLoaded }) {
   // Column width (all 5 columns = 280px)
   const COLUMN_WIDTH = 280
 
-  // Column definitions with new X positions (left edge from centerline)
+  // Column definitions with X positions (left edge from centerline)
   // Using calc(50% + Xpx) for positioning
+  // Phase 1 Final: All columns shifted -40px left
   const columns = [
-    { id: 'clo', label: 'Course Learning Objectives', xOffset: -855 },
-    { id: 'lesson', label: 'Lesson', xOffset: -475 },
-    { id: 'topic', label: 'Topic', xOffset: -95 },
-    { id: 'subtopic', label: 'Subtopic', xOffset: 285 },
-    { id: 'pc', label: 'Performance Criteria', xOffset: 665 }
+    { id: 'clo', label: 'Course Learning Objectives', xOffset: -850 },
+    { id: 'lesson', label: 'Lesson', xOffset: -470 },
+    { id: 'topic', label: 'Topic', xOffset: -90 },
+    { id: 'subtopic', label: 'Subtopic', xOffset: 290 },
+    { id: 'pc', label: 'Performance Criteria', xOffset: 670 }
   ]
 
   // Placeholder data for demonstration
@@ -111,8 +112,8 @@ function Design({ onNavigate, courseLoaded, setCourseLoaded }) {
   }
 
   // Font sizes
-  // Base column label was 6pt, +35% = 8.1pt ≈ 8pt
-  const columnLabelSize = 'text-[8pt]'
+  // Column label: previous 8pt, +25% = 10pt
+  const columnLabelSize = 'text-[10pt]'
   // Base data item was 6pt, +25% = 7.5pt ≈ 7.5pt
   const dataItemSize = 'text-[7.5pt]'
   // Base module label was 8pt, +20% = 9.6pt ≈ 10pt
@@ -142,9 +143,11 @@ function Design({ onNavigate, courseLoaded, setCourseLoaded }) {
         </span>
       </div>
 
-      {/* Module Selector */}
-      {/* Refinement #8: Module label font size +20% */}
-      <div className="px-[2%] mb-2 flex items-center gap-2">
+      {/* Module Selector - aligned with CLO column at X=-850px */}
+      <div 
+        className="mb-2 flex items-center gap-2"
+        style={{ marginLeft: 'calc(50% - 850px)' }}
+      >
         <span className={`text-[#f2f2f2] ${moduleLabelSize} font-prometheus tracking-[0.3em]`}>
           Module:
         </span>
@@ -152,13 +155,14 @@ function Design({ onNavigate, courseLoaded, setCourseLoaded }) {
           value={selectedModule}
           onChange={(e) => setSelectedModule(e.target.value)}
           className={`bg-transparent text-[#f2f2f2] ${moduleLabelSize} font-prometheus tracking-[0.3em] 
-                     border-none focus:outline-none cursor-pointer`}
+                     border-none focus:outline-none cursor-pointer appearance-none`}
+          style={{ paddingRight: '0' }}
         >
           <option value="1" className="bg-[#1a1a1a]">1</option>
           <option value="2" className="bg-[#1a1a1a]">2</option>
           <option value="3" className="bg-[#1a1a1a]">3</option>
         </select>
-        {/* Dropdown arrow */}
+        {/* Single dropdown arrow */}
         <span className="text-[#767171] text-[6pt]">▼</span>
       </div>
 
@@ -255,8 +259,8 @@ function Design({ onNavigate, courseLoaded, setCourseLoaded }) {
 
         {/* Center section: < + > buttons and PKE Interface */}
         <div className="flex flex-col items-center justify-end h-full">
-          {/* < + > buttons - 6px above PKE window */}
-          <div className="flex items-center gap-4 text-[#767171] mb-[6px]">
+          {/* < + > buttons - 6px above PKE window, shifted 35px right to align with PKE */}
+          <div className="flex items-center gap-4 text-[#767171] mb-[6px]" style={{ marginLeft: '35px' }}>
             <button className="hover:text-[#f2f2f2] transition-colors text-xl">&lt;</button>
             <span className="text-sm">+</span>
             <button className="hover:text-[#f2f2f2] transition-colors text-xl">&gt;</button>

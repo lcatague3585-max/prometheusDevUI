@@ -34,7 +34,8 @@ function PKEInterface({ isActive = false, onClose }) {
           : defaultGradient, // A7: New gradient when inactive
         boxShadow: isActive 
           ? '0 0 12px 4px rgba(255, 102, 0, 0.6)' // B11: Scaled glow for larger size
-          : 'none'
+          : 'none',
+        marginLeft: '35px' // Horizontal shift right 35px (all pages)
       }}
     >
       <div 

@@ -31,8 +31,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * Prometheus UI is designed for 1920×1080 minimum resolution
+ * Smaller viewports scale proportionally (no horizontal scrollbar)
+ * Scaling is handled by useViewportScale hook in App.jsx
+ */
 #root {
   min-height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Prevent scrollbars when scaled */
 }
 
 /* Custom scrollbar for dark theme */
