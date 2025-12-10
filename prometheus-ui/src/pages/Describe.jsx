@@ -8,7 +8,10 @@ import { LAYOUT } from '../constants/layout'
 
 function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
   const [isPKEActive, setIsPKEActive] = useState(false)
-  
+
+  // D7: Track LOAD button active state
+  const [isLoadActive, setIsLoadActive] = useState(false)
+
   // B10: Track focused and hovered field for burnt orange effect
   const [focusedField, setFocusedField] = useState(null)
   const [hoveredField, setHoveredField] = useState(null)
@@ -16,6 +19,7 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
   const [formData, setFormData] = useState({
     title: '',
     level: '',
+    seniorCourse: false,  // C5: Senior Course Y/N toggle
     thematic: '',
     duration: '',
     code: '',
@@ -52,21 +56,24 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
     }
   }, [])
 
-  // Deactivate PKE and clear focus on load
+  // Deactivate PKE, clear focus, and activate LOAD button on load
   const handleLoad = useCallback(() => {
     setCourseLoaded(true)
     setIsPKEActive(false)
+    setIsLoadActive(true)  // D7: Activate LOAD button
     clearFocusState()
   }, [setCourseLoaded, clearFocusState])
 
-  // Deactivate PKE and clear focus on clear
+  // Deactivate PKE, clear focus, and deactivate LOAD button on clear
   const handleClear = useCallback(() => {
     setCourseLoaded(false)
     setIsPKEActive(false)
+    setIsLoadActive(false)  // D7: Deactivate LOAD button
     clearFocusState()
     setFormData({
       title: '',
       level: '',
+      seniorCourse: false,
       thematic: '',
       duration: '',
       code: '',
@@ -76,16 +83,18 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
     })
   }, [setCourseLoaded, clearFocusState])
 
-  // Deactivate PKE and clear focus on save
+  // Deactivate PKE, clear focus, and deactivate LOAD button on save
   const handleSave = useCallback(() => {
     console.log('Saving course data:', formData)
     setIsPKEActive(false)
+    setIsLoadActive(false)  // D7: Deactivate LOAD button
     clearFocusState()
   }, [formData, clearFocusState])
 
-  // Deactivate PKE and clear focus on delete
+  // Deactivate PKE, clear focus, and deactivate LOAD button on delete
   const handleDelete = useCallback(() => {
     setIsPKEActive(false)
+    setIsLoadActive(false)  // D7: Deactivate LOAD button
     clearFocusState()
     handleClear()
   }, [handleClear, clearFocusState])
@@ -112,19 +121,14 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
   // Sizing constants from layout.js
   const labelFontSize = 'text-[15px]'
 
-  // Level dropdown options (10 options)
+  // Level dropdown options (5 options per C1 refinement)
   const levelOptions = [
     { value: '', label: 'Select...' },
     { value: 'awareness', label: 'Awareness' },
-    { value: 'foundation', label: 'Foundation' },
+    { value: 'foundational', label: 'Foundational' },
     { value: 'intermediate', label: 'Intermediate' },
     { value: 'advanced', label: 'Advanced' },
-    { value: 'expert', label: 'Expert' },
-    { value: 'all-awareness', label: 'All Awareness' },
-    { value: 'all-foundation', label: 'All Foundation' },
-    { value: 'all-intermediate', label: 'All Intermediate' },
-    { value: 'all-advanced', label: 'All Advanced' },
-    { value: 'senior-expert', label: 'Senior Expert' }
+    { value: 'expert', label: 'Expert' }
   ]
 
   // Thematic dropdown options (7 options)
@@ -151,7 +155,7 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
   // Bottom section Y coordinates (fixed positioning from viewport top)
   const ABOVE_LINE_BOTTOM = 860  // Elements above line - bottom edge Y
   const BOTTOM_LINE_Y = 875      // Horizontal line top edge
-  const BELOW_LINE_Y = 915       // Status bar content Y plane
+  const BELOW_LINE_Y = 910       // Status bar content Y plane (moved up from 915)
 
   return (
     <>
@@ -181,29 +185,29 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
           }}
         >
           <div className="flex">
-            {/* Labels column */}
+            {/* Labels column - B4: Heights adjusted to match bordered input heights (39px + 2px border = 41px) */}
             <div className="flex flex-col items-end pr-4" style={{ width: `${LAYOUT.LABEL_WIDTH}px` }}>
-              <label className={`${getLabelColor('title')} ${labelFontSize} font-prometheus h-[${LAYOUT.INPUT_HEIGHT}px] flex items-center transition-colors`}>
+              <label className={`${getLabelColor('title')} ${labelFontSize} font-prometheus h-[41px] flex items-center transition-colors`}>
                 Title:
               </label>
               <div style={{ height: `${LAYOUT.ROW_GAP}px` }} />
-              <label className={`${getLabelColor('level')} ${labelFontSize} font-prometheus h-[${LAYOUT.INPUT_HEIGHT}px] flex items-center transition-colors`}>
+              <label className={`${getLabelColor('level')} ${labelFontSize} font-prometheus h-[41px] flex items-center transition-colors`}>
                 Level:
               </label>
               <div style={{ height: `${LAYOUT.ROW_GAP}px` }} />
-              <label className={`${getLabelColor('thematic')} ${labelFontSize} font-prometheus h-[${LAYOUT.INPUT_HEIGHT}px] flex items-center transition-colors`}>
+              <label className={`${getLabelColor('thematic')} ${labelFontSize} font-prometheus h-[41px] flex items-center transition-colors`}>
                 Thematic:
               </label>
               <div style={{ height: `${LAYOUT.ROW_GAP}px` }} />
-              <label className={`${getLabelColor('duration')} ${labelFontSize} font-prometheus h-[${LAYOUT.INPUT_HEIGHT}px] flex items-center transition-colors`}>
+              <label className={`${getLabelColor('duration')} ${labelFontSize} font-prometheus h-[41px] flex items-center transition-colors`}>
                 Duration:
               </label>
               <div style={{ height: `${LAYOUT.ROW_GAP}px` }} />
-              <label className={`${getLabelColor('developer')} ${labelFontSize} font-prometheus h-[${LAYOUT.INPUT_HEIGHT}px] flex items-center transition-colors`}>
+              <label className={`${getLabelColor('developer')} ${labelFontSize} font-prometheus h-[41px] flex items-center transition-colors`}>
                 Developer:
               </label>
               <div style={{ height: `${LAYOUT.ROW_GAP + LAYOUT.DEVELOPER_SELECT_GAP}px` }} />
-              <label className={`${getLabelColor('selectedCourse')} ${labelFontSize} font-prometheus h-[${LAYOUT.INPUT_HEIGHT}px] flex items-center transition-colors`}>
+              <label className={`${getLabelColor('selectedCourse')} ${labelFontSize} font-prometheus h-[41px] flex items-center transition-colors`}>
                 Select Course:
               </label>
             </div>
@@ -226,23 +230,50 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
               </GradientBorder>
               <div style={{ height: `${LAYOUT.ROW_GAP}px` }} />
               
-              {/* Level */}
-              <GradientBorder isActive={isFieldActive('level')}>
-                <select
-                  value={formData.level}
-                  onChange={(e) => handleInputChange('level', e.target.value)}
-                  onFocus={() => handleFieldFocus('level')}
-                  onBlur={handleFieldBlur}
-                  onKeyDown={handleKeyDown}
-                  onMouseEnter={() => setHoveredField('level')}
-                  onMouseLeave={() => setHoveredField(null)}
-                  className={`w-full h-[${LAYOUT.INPUT_HEIGHT}px] bg-[#0d0d0d] text-[#f2f2f2] text-[13px] px-4 rounded-[3px] focus:outline-none font-cascadia cursor-pointer`}
-                >
-                  {levelOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </GradientBorder>
+              {/* Level + Senior Course Row (C2, C5) */}
+              <div className="flex items-center gap-4">
+                <GradientBorder isActive={isFieldActive('level')} className="w-[190px]">
+                  <select
+                    value={formData.level}
+                    onChange={(e) => handleInputChange('level', e.target.value)}
+                    onFocus={() => handleFieldFocus('level')}
+                    onBlur={handleFieldBlur}
+                    onKeyDown={handleKeyDown}
+                    onMouseEnter={() => setHoveredField('level')}
+                    onMouseLeave={() => setHoveredField(null)}
+                    className={`w-full h-[${LAYOUT.INPUT_HEIGHT}px] bg-[#0d0d0d] text-[#f2f2f2] text-[13px] px-4 rounded-[3px] focus:outline-none font-cascadia cursor-pointer`}
+                  >
+                    {levelOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </GradientBorder>
+
+                {/* C5: Senior Course Y/N Radio Toggle - shifted 30px right per Part C */}
+                <div className="flex items-center gap-2 ml-[30px]">
+                  <span className="text-[#f2f2f2] text-[13px] font-prometheus">Senior Course Y / N</span>
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange('seniorCourse', !formData.seniorCourse)}
+                    className={`w-[40px] h-[22px] rounded-full transition-all duration-200 relative ${
+                      formData.seniorCourse
+                        ? 'bg-[#FF6600]'
+                        : 'bg-[#767171]'
+                    }`}
+                    style={{
+                      boxShadow: formData.seniorCourse
+                        ? '0 0 8px 2px rgba(255, 102, 0, 0.4)'
+                        : 'none'
+                    }}
+                  >
+                    <div
+                      className={`absolute top-[2px] w-[18px] h-[18px] rounded-full bg-white transition-all duration-200 ${
+                        formData.seniorCourse ? 'left-[20px]' : 'left-[2px]'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
               <div style={{ height: `${LAYOUT.ROW_GAP}px` }} />
               
               {/* Thematic */}
@@ -264,9 +295,9 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
               </GradientBorder>
               <div style={{ height: `${LAYOUT.ROW_GAP}px` }} />
               
-              {/* Duration + Code Row */}
+              {/* Duration + Code Row (C2: Duration 190px, C3-C4: Code shifted left) */}
               <div className="flex items-center gap-3">
-                <GradientBorder className={`w-[${LAYOUT.DURATION_WIDTH}px]`} isActive={isFieldActive('duration')}>
+                <GradientBorder className="w-[190px]" isActive={isFieldActive('duration')}>
                   <input
                     type="text"
                     value={formData.duration}
@@ -334,13 +365,20 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
               </GradientBorder>
               <div style={{ height: `${LAYOUT.ROW_GAP}px` }} />
               
-              {/* Load Button - Right aligned */}
+              {/* Load Button - Right aligned (D7: grey default, orange+glow when active) */}
               <div className="flex justify-end">
                 <button
                   onClick={handleLoad}
-                  className="h-[31px] px-10 rounded-full text-[13px] font-prometheus text-white uppercase tracking-wider transition-all hover:brightness-110"
+                  className={`h-[31px] px-10 rounded-full text-[13px] font-prometheus uppercase tracking-wider transition-all hover:brightness-110 ${
+                    isLoadActive ? 'text-white' : 'text-[#f2f2f2]'
+                  }`}
                   style={{
-                    background: 'linear-gradient(to bottom, #D65700, #763000)'
+                    background: isLoadActive
+                      ? 'linear-gradient(to bottom, #D65700, #763000)'
+                      : '#767171',
+                    boxShadow: isLoadActive
+                      ? '0 0 10px 2px rgba(255, 102, 0, 0.4)'
+                      : 'none'
                   }}
                 >
                   Load
@@ -451,7 +489,7 @@ function Describe({ onNavigate, courseLoaded, setCourseLoaded }) {
         }}
       />
 
-      {/* Status bar BELOW the line - positioned at Y = 915px */}
+      {/* Status bar BELOW the line - positioned at Y = 910px */}
       <div 
         className="fixed left-0 right-0"
         style={{ top: `${BELOW_LINE_Y}px` }}

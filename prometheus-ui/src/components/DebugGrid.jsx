@@ -1,19 +1,40 @@
 /**
  * DebugGrid - Visual coordinate overlay for precise UI positioning
- * 
+ *
  * Toggle with Ctrl+G
  * Only renders in development mode
- * 
+ *
  * Features:
  * - Vertical centerline at 50% (cyan, prominent)
  * - Vertical gridlines every 95px (≈25mm) from center
  * - Horizontal gridlines every 95px from top
  * - Coordinate labels at key positions
  * - Viewport scale factor display
+ * - D6: Real-time mouse coordinate display (X relative to centerline, Y from top)
  * - pointer-events: none (doesn't interfere with UI)
  */
 
+import { useState, useEffect } from 'react'
+
 function DebugGrid({ isVisible, scale = 1 }) {
+  // D6: Track mouse position
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    if (!isVisible) return
+
+    const handleMouseMove = (e) => {
+      // Calculate X relative to centerline (viewport center)
+      const centerX = window.innerWidth / 2
+      const relativeX = Math.round(e.clientX - centerX)
+      const y = Math.round(e.clientY)
+      setMousePos({ x: relativeX, y })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [isVisible])
+
   if (!isVisible) return null
 
   // Grid spacing in pixels (≈25mm at 96 DPI)
@@ -157,7 +178,7 @@ function DebugGrid({ isVisible, scale = 1 }) {
       </div>
 
       {/* Reference info */}
-      <div 
+      <div
         className="absolute bottom-2 left-2 px-2 py-1 rounded text-[9px] font-mono"
         style={{
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -165,6 +186,18 @@ function DebugGrid({ isVisible, scale = 1 }) {
         }}
       >
         Grid: 95px (≈25mm) | Centerline: 0 | Left: -X | Right: +X
+      </div>
+
+      {/* D6: Mouse coordinate display */}
+      <div
+        className="absolute bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded text-[11px] font-mono"
+        style={{
+          backgroundColor: 'rgba(255, 102, 0, 0.2)',
+          color: 'rgba(255, 200, 100, 1)',
+          border: '1px solid rgba(255, 102, 0, 0.5)'
+        }}
+      >
+        Mouse: X: {mousePos.x >= 0 ? '+' : ''}{mousePos.x} | Y: {mousePos.y}
       </div>
     </div>
   )

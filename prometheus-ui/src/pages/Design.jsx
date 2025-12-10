@@ -86,7 +86,7 @@ function Design({ onNavigate, courseLoaded, setCourseLoaded }) {
   // Bottom section Y coordinates (matching Describe.jsx)
   const ABOVE_LINE_BOTTOM = 860
   const BOTTOM_LINE_Y = 875
-  const BELOW_LINE_Y = 915
+  const BELOW_LINE_Y = 910  // Status bar at Y=910px (moved up from 915)
 
   // Column width (all 5 columns = 280px)
   const COLUMN_WIDTH = 280
@@ -201,11 +201,11 @@ function Design({ onNavigate, courseLoaded, setCourseLoaded }) {
             {/* Refinement #3: Hover/focus burnt orange */}
             {/* Refinement #5: 280px width */}
             <GradientBorder isActive={isColumnActive(col.id)}>
-              <div 
+              <div
                 className="bg-[#0d0d0d] rounded-[3px] cursor-pointer"
-                style={{ 
+                style={{
                   height: `${LAYOUT.DESIGN_COLUMN_HEIGHT}px`,
-                  width: `${COLUMN_WIDTH - 2}px`
+                  width: `${COLUMN_WIDTH - 2}px`  /* Adjusted for 1px border */
                 }}
                 onMouseEnter={() => setHoveredColumn(col.id)}
                 onMouseLeave={() => setHoveredColumn(null)}
@@ -308,7 +308,7 @@ function Design({ onNavigate, courseLoaded, setCourseLoaded }) {
         }}
       />
 
-      {/* Status bar BELOW the line - positioned at Y = 915px */}
+      {/* Status bar BELOW the line - positioned at Y = 910px */}
       <div 
         className="fixed left-0 right-0"
         style={{ top: `${BELOW_LINE_Y}px` }}

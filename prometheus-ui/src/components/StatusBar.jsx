@@ -1,10 +1,12 @@
 /**
  * StatusBar - Bottom status bar component
- * 
- * Positioned by parent at Y = 915px plane
+ *
+ * Positioned by parent at Y = 910px plane
  * Contains: OWNER, START DATE, STATUS, PROGRESS, APPROVED, Date/Time
- * 
+ *
  * Date/Time positioning: TIME left edge on centerline, DATE to its left
+ *
+ * Font size: 13px (20% increase from original 11px)
  */
 
 function StatusBar({ courseLoaded = false, statusData = {} }) {
@@ -41,10 +43,10 @@ function StatusBar({ courseLoaded = false, statusData = {} }) {
 
   return (
     <div className="w-full relative">
-      {/* All content on the Y = 915px plane (positioned by parent) */}
+      {/* All content on the Y = 910px plane (positioned by parent) */}
       <div className="flex items-center px-[2%]">
         {/* Left side - Owner and metadata */}
-        <div className="flex items-center gap-8 text-[11px] font-cascadia">
+        <div className="flex items-center gap-8 text-[13px] font-cascadia">
           <div className="flex gap-2">
             <span className="text-[#f2f2f2]">OWNER:</span>
             <span className="text-[#00FF00]">{data.owner}</span>
@@ -78,7 +80,7 @@ function StatusBar({ courseLoaded = false, statusData = {} }) {
         <div className="flex-1" />
 
         {/* Right side - Approval status */}
-        <div className="text-[11px] font-cascadia flex gap-2">
+        <div className="text-[13px] font-cascadia flex gap-2">
           <span className="text-[#f2f2f2]">APPROVED FOR USE Y/N:</span>
           <span className={data.approved === 'N' ? 'text-[#ff0000]' : 'text-[#00FF00]'}>
             {data.approved}
@@ -88,8 +90,8 @@ function StatusBar({ courseLoaded = false, statusData = {} }) {
 
       {/* Date/Time - Positioned so TIME left edge is on centerline */}
       {/* DATE is to the left of TIME with spacing preserved */}
-      <div 
-        className="absolute text-[11px] font-cascadia text-[#00FF00]"
+      <div
+        className="absolute text-[13px] font-cascadia text-[#00FF00]"
         style={{ 
           left: '50%',  // Start at centerline
           top: '0',
@@ -99,9 +101,9 @@ function StatusBar({ courseLoaded = false, statusData = {} }) {
       >
         {dateStr}
       </div>
-      <div 
-        className="absolute text-[11px] font-cascadia text-[#00FF00]"
-        style={{ 
+      <div
+        className="absolute text-[13px] font-cascadia text-[#00FF00]"
+        style={{
           left: '50%',  // TIME left edge at centerline
           top: '0'
         }}
