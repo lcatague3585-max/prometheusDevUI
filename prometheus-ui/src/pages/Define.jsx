@@ -436,9 +436,9 @@ function Define({ onNavigate, courseData, setCourseData, courseLoaded }) {
                 <button
                   onClick={() => updateField(toggle.key, !formData[toggle.key])}
                   style={{
-                    width: '36px',
-                    height: '18px',
-                    borderRadius: '9px',
+                    width: '54px',
+                    height: '24px',
+                    borderRadius: '12px',
                     background: formData[toggle.key] ? THEME.AMBER : THEME.BORDER_GREY,
                     border: 'none',
                     cursor: 'pointer',
@@ -450,9 +450,9 @@ function Define({ onNavigate, courseData, setCourseData, courseLoaded }) {
                     style={{
                       position: 'absolute',
                       top: '2px',
-                      left: formData[toggle.key] ? '20px' : '2px',
-                      width: '14px',
-                      height: '14px',
+                      left: formData[toggle.key] ? '30px' : '2px',
+                      width: '18px',
+                      height: '18px',
                       borderRadius: '50%',
                       background: THEME.WHITE,
                       transition: 'left 0.2s ease'
