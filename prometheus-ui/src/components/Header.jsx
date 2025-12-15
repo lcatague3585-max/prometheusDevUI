@@ -1,11 +1,5 @@
 /**
  * Header Component - Shared header for all main pages
- *
- * Features:
- * - Course title display (from context)
- * - Page title
- * - User info
- * - Settings/logout access
  */
 
 import { useState } from 'react'
@@ -18,7 +12,6 @@ function Header({ pageTitle }) {
   const { user, logout } = useAuth()
   const [showUserMenu, setShowUserMenu] = useState(false)
 
-  // Get course info
   const courseTitle = currentCourse?.title || 'Untitled Course'
   const courseCode = currentCourse?.code || '---'
 
@@ -33,9 +26,7 @@ function Header({ pageTitle }) {
         background: 'rgba(0, 0, 0, 0.3)'
       }}
     >
-      {/* Left: Course Info */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        {/* Course Code Badge */}
         <div
           style={{
             padding: '6px 12px',
@@ -56,7 +47,6 @@ function Header({ pageTitle }) {
           </span>
         </div>
 
-        {/* Course Title */}
         <div>
           <h1
             style={{
@@ -81,7 +71,6 @@ function Header({ pageTitle }) {
         </div>
       </div>
 
-      {/* Center: Page Title */}
       <div style={{ flex: 1, textAlign: 'center' }}>
         <h2
           style={{
@@ -96,7 +85,6 @@ function Header({ pageTitle }) {
         </h2>
       </div>
 
-      {/* Right: User Info */}
       <div
         style={{
           display: 'flex',
@@ -105,7 +93,6 @@ function Header({ pageTitle }) {
           position: 'relative'
         }}
       >
-        {/* Version Badge */}
         <span
           style={{
             fontSize: '9px',
@@ -119,7 +106,6 @@ function Header({ pageTitle }) {
           V2.1 + PKE
         </span>
 
-        {/* User Button */}
         <button
           onClick={() => setShowUserMenu(!showUserMenu)}
           style={{
@@ -130,13 +116,9 @@ function Header({ pageTitle }) {
             background: 'transparent',
             border: `1px solid ${THEME.BORDER}`,
             borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'border-color 0.2s ease'
+            cursor: 'pointer'
           }}
-          onMouseEnter={(e) => e.target.style.borderColor = THEME.TEXT_DIM}
-          onMouseLeave={(e) => e.target.style.borderColor = THEME.BORDER}
         >
-          {/* Avatar */}
           <div
             style={{
               width: '24px',
@@ -158,7 +140,6 @@ function Header({ pageTitle }) {
           <span style={{ fontSize: '10px', color: THEME.TEXT_MUTED }}>▼</span>
         </button>
 
-        {/* User Dropdown Menu */}
         {showUserMenu && (
           <div
             style={{
@@ -174,7 +155,6 @@ function Header({ pageTitle }) {
               zIndex: 1000
             }}
           >
-            {/* User Info */}
             <div
               style={{
                 padding: '12px 16px',
@@ -189,7 +169,6 @@ function Header({ pageTitle }) {
               </div>
             </div>
 
-            {/* Menu Items */}
             <div style={{ padding: '8px 0' }}>
               <MenuButton label="Settings" icon="⚙️" onClick={() => setShowUserMenu(false)} />
               <MenuButton label="Help" icon="❓" onClick={() => setShowUserMenu(false)} />
@@ -208,7 +187,6 @@ function Header({ pageTitle }) {
         )}
       </div>
 
-      {/* Click outside to close menu */}
       {showUserMenu && (
         <div
           style={{
@@ -226,10 +204,6 @@ function Header({ pageTitle }) {
   )
 }
 
-// ===========================================
-// Sub-components
-// ===========================================
-
 function MenuButton({ label, icon, onClick, danger }) {
   return (
     <button
@@ -243,11 +217,8 @@ function MenuButton({ label, icon, onClick, danger }) {
         background: 'transparent',
         border: 'none',
         cursor: 'pointer',
-        textAlign: 'left',
-        transition: 'background 0.2s ease'
+        textAlign: 'left'
       }}
-      onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.05)'}
-      onMouseLeave={(e) => e.target.style.background = 'transparent'}
     >
       <span style={{ fontSize: '14px' }}>{icon}</span>
       <span
@@ -264,22 +235,3 @@ function MenuButton({ label, icon, onClick, danger }) {
 }
 
 export default Header
-```
-
----
-
-**Go to GitHub → Navigate to `src/components/Header.jsx`**
-- Click the **pencil icon** (edit)
-- **Select all** and **delete** existing content
-- Paste the code above
-- Click "Commit changes"
-
----
-
-## ✅ NOW you're truly done with all 18 files!
-
-**Final step - create `.env` file:**
-
-In your local `prometheus-ui` folder, create a file named `.env` with:
-```
-VITE_API_URL=http://localhost:3001/api
