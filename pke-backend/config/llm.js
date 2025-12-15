@@ -31,13 +31,12 @@ const getConfig = () => {
   return configs[provider] || configs[LLM_PROVIDERS.OPENAI];
 };
 
-// Model capabilities for different invocations
 const MODEL_CONFIGS = {
-  invocation1: { temperature: 0.7, maxTokens: 2000 },  // Course description - creative
-  invocation2: { temperature: 0.5, maxTokens: 3000 },  // Learning objectives - balanced
-  invocation3: { temperature: 0.6, maxTokens: 4000 },  // Topics/structure - balanced
-  invocation4: { temperature: 0.4, maxTokens: 8000 },  // Full build - precise
-  invocation5: { temperature: 0.3, maxTokens: 2000 },  // Template mapping - precise
+  invocation1: { temperature: 0.7, maxTokens: 2000 },
+  invocation2: { temperature: 0.5, maxTokens: 3000 },
+  invocation3: { temperature: 0.6, maxTokens: 4000 },
+  invocation4: { temperature: 0.4, maxTokens: 8000 },
+  invocation5: { temperature: 0.3, maxTokens: 2000 },
 };
 
 module.exports = {
