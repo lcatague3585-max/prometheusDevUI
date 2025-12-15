@@ -1,152 +1,97 @@
 /**
- * Build Page - Placeholder
- *
- * Coming Soon page with full frame structure
+ * Build Page - Enabling Objectives & Assessment
+ * 
+ * Features:
+ * - Enabling Objectives (Invocation 3)
+ * - Assessment Generation (Invocation 4)
+ * - Two-tab interface
  */
 
 import { useState, useCallback } from 'react'
 import { THEME } from '../constants/theme'
-import NavWheel from '../components/NavWheel'
-import StatusBar from '../components/StatusBar'
-import PKEInterface from '../components/PKEInterface'
+import { useCourse } from '../context/CourseContext'
+import { usePKE } from '../context/PKEContext'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
+import pkeButton from '../assets/PKE_Button.png'
 
-function Build({ onNavigate, courseLoaded }) {
-  const [isPKEActive, setIsPKEActive] = useState(false)
-  const [wheelExpanded, setWheelExpanded] = useState(false)
+// Bloom's taxonomy levels
+const BLOOMS_LEVELS = [
+  { value: 'remember', label: 'Remember', color: '#9C27B0' },
+  { value: 'understand', label: 'Understand', color: '#3F51B5' },
+  { value: 'apply', label: 'Apply', color: '#2196F3' },
+  { value: 'analyze', label: 'Analyze', color: '#4CAF50' },
+  { value: 'evaluate', label: 'Evaluate', color: '#FF9800' },
+  { value: 'create', label: 'Create', color: '#F44336' }
+]
 
+// Assessment types
+const ASSESSMENT_TYPES = [
+  { value: 'quiz', label: 'Quiz / Multiple Choice' },
+  { value: 'practical', label: 'Practical Exercise' },
+  { value: 'written', label: 'Written Response' },
+  { value: 'oral', label: 'Oral Examination' },
+  { value: 'project', label: 'Project-Based' }
+]
+
+function Build({ onNavigate, onSave, onClear, onDelete, user, courseState, progress }) {
+  const { currentCourse } = useCourse()
+  const {
+    openPKE,
+    closePKE,
+    isActive: isPKEActive,
+    executeInvocation,
+    acceptInvocation,
+    isProcessing,
+    message,
+    messageType,
+    getInvocationStatus,
+    pendingResult
+  } = usePKE()
+
+  // Local state
+  const [activeTab, setActiveTab] = useState('enabling') // 'enabling' | 'assessment'
+  const [selectedModule, setSelectedModule] = useState(0)
+  const [selectedLesson, setSelectedLesson] = useState(0)
+  const [assessmentType, setAssessmentType] = useState('quiz')
+  const [assessmentItems, setAssessmentItems] = useState([])
+  const [editingItem, setEditingItem] = useState(null)
+
+  // Get statuses
+  const inv3Status = getInvocationStatus(3)
+  const inv4Status = getInvocationStatus(4)
+
+  // Handle navigation
   const handleNavigate = useCallback((section) => {
-    setWheelExpanded(false)
     onNavigate?.(section)
   }, [onNavigate])
 
-  return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        background: THEME.BG_DARK,
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative'
-      }}
-    >
-      {/* Page Title */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px 0',
-          borderBottom: `1px solid ${THEME.BORDER}`
-        }}
-      >
-        <h1
-          style={{
-            fontSize: '20px',
-            letterSpacing: '6px',
-            color: THEME.OFF_WHITE,
-            fontFamily: THEME.FONT_PRIMARY
-          }}
-        >
-          BUILD
-        </h1>
-      </div>
+  // Generate enabling objectives (Invocation 3)
+  const handleGenerateEnabling = useCallback(async () => {
+    try {
+      await executeInvocation(3, {
+        terminalObjectives: currentCourse?.learningObjectives || [],
+        modules: currentCourse?.modules || []
+      })
+    } catch (err) {
+      console.error('Failed to generate enabling objectives:', err)
+    }
+  }, [executeInvocation, currentCourse])
 
-      {/* Main Content - Coming Soon */}
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <div
-          className="fade-in-scale"
-          style={{
-            textAlign: 'center'
-          }}
-        >
-          <div
-            style={{
-              fontSize: '48px',
-              color: THEME.AMBER_DARK,
-              marginBottom: '20px',
-              opacity: 0.5
-            }}
-          >
-            ⚙
-          </div>
-          <h2
-            style={{
-              fontSize: '14px',
-              letterSpacing: '6px',
-              color: THEME.TEXT_DIM,
-              fontFamily: THEME.FONT_PRIMARY,
-              marginBottom: '12px'
-            }}
-          >
-            COMING SOON
-          </h2>
-          <p
-            style={{
-              fontSize: '10px',
-              letterSpacing: '2px',
-              color: THEME.TEXT_MUTED,
-              fontFamily: THEME.FONT_MONO
-            }}
-          >
-            Build functionality is under development
-          </p>
-        </div>
-      </div>
+  // Generate assessment (Invocation 4)
+  const handleGenerateAssessment = useCallback(async () => {
+    try {
+      await executeInvocation(4, {
+        objectives: currentCourse?.learningObjectives || [],
+        assessmentType,
+        modules: currentCourse?.modules || []
+      })
+    } catch (err) {
+      console.error('Failed to generate assessment:', err)
+    }
+  }, [executeInvocation, currentCourse, assessmentType])
 
-      {/* Bottom Controls */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            padding: '0 40px 20px',
-            marginBottom: '15px'
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <button style={navButtonStyle}>&lt;</button>
-              <span style={{ color: THEME.TEXT_DIM, fontSize: '12px' }}>+</span>
-              <button style={navButtonStyle}>&gt;</button>
-            </div>
-            <PKEInterface isActive={isPKEActive} onClose={() => setIsPKEActive(false)} />
-          </div>
-        </div>
-
-        <div style={{ width: '100%', height: '1px', background: THEME.GRADIENT_LINE_BOTTOM }} />
-        <StatusBar courseLoaded={courseLoaded} />
-      </div>
-
-      {/* Mini NavWheel */}
-      <div style={{ position: 'absolute', bottom: '100px', left: '30px' }}>
-        <NavWheel
-          currentSection="build"
-          onNavigate={handleNavigate}
-          isExpanded={wheelExpanded}
-          onToggle={() => setWheelExpanded(!wheelExpanded)}
-        />
-      </div>
-    </div>
-  )
-}
-
-const navButtonStyle = {
-  background: 'transparent',
-  border: 'none',
-  color: THEME.TEXT_DIM,
-  fontSize: '18px',
-  cursor: 'pointer',
-  padding: '4px 8px'
-}
-
-export default Build
+  // Accept results
+  const handleAccept = useCallback(async (invocationNum) => {
+    try {
+      await acceptInvocation(invocatio
