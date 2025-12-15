@@ -1,141 +1,285 @@
 /**
- * Header.jsx - Shared Header Component
+ * Header Component - Shared header for all main pages
  *
- * EXACT SPECIFICATION (URGENT_HEADER_FIX.md):
- * - Logo: 60px at (20px, 10px) - NO text beside it
- * - Main Title: 24px, centered horizontally, Y-center aligned with logo (~Y=40)
- * - Info Cluster: Right-aligned at (right:20px, top:15px), grey labels, values "---" when empty
- * - Horizontal Line: Y=85, full width gradient
- * - Page Title: Centered, Y=92 (7px below line), 18px font
- *
- * This component is used by ALL pages for consistent header layout.
+ * Features:
+ * - Course title display (from context)
+ * - Page title
+ * - User info
+ * - Settings/logout access
  */
 
-import logo from '../assets/burntorangelogo.png'
+import { useState } from 'react'
 import { THEME } from '../constants/theme'
+import { useCourse } from '../context/CourseContext'
+import { useAuth } from '../context/AuthContext'
 
-function Header({ pageTitle, courseData = {} }) {
-  // Determine if values should show (only when explicitly populated)
-  const hasValue = (val) => val && val !== '' && val !== '---'
+function Header({ pageTitle }) {
+  const { currentCourse } = useCourse()
+  const { user, logout } = useAuth()
+  const [showUserMenu, setShowUserMenu] = useState(false)
+
+  // Get course info
+  const courseTitle = currentCourse?.title || 'Untitled Course'
+  const courseCode = currentCourse?.code || '---'
 
   return (
-    <header
+    <div
       style={{
-        position: 'relative',
-        width: '100%',
-        height: '120px',
-        background: 'transparent',
-        flexShrink: 0
+        height: '64px',
+        borderBottom: `1px solid ${THEME.BORDER}`,
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 40px',
+        background: 'rgba(0, 0, 0, 0.3)'
       }}
     >
-      {/* Logo - far left, NO text beside it */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '20px',
-          top: '10px',
-          width: '60px',
-          height: '60px'
-        }}
-      >
-        <img
-          src={logo}
-          alt="Prometheus"
+      {/* Left: Course Info */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Course Code Badge */}
+        <div
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain'
+            padding: '6px 12px',
+            background: 'rgba(212, 115, 12, 0.1)',
+            border: `1px solid ${THEME.AMBER}`,
+            borderRadius: '4px'
           }}
+        >
+          <span
+            style={{
+              fontSize: '11px',
+              color: THEME.AMBER,
+              fontFamily: THEME.FONT_MONO,
+              letterSpacing: '1px'
+            }}
+          >
+            {courseCode}
+          </span>
+        </div>
+
+        {/* Course Title */}
+        <div>
+          <h1
+            style={{
+              fontSize: '14px',
+              color: THEME.TEXT_PRIMARY,
+              fontWeight: 'normal',
+              letterSpacing: '1px',
+              margin: 0
+            }}
+          >
+            {courseTitle}
+          </h1>
+          <span
+            style={{
+              fontSize: '9px',
+              color: THEME.TEXT_MUTED,
+              letterSpacing: '2px'
+            }}
+          >
+            {currentCourse?.id ? `ID: ${currentCourse.id.slice(0, 8)}...` : 'UNSAVED'}
+          </span>
+        </div>
+      </div>
+
+      {/* Center: Page Title */}
+      <div style={{ flex: 1, textAlign: 'center' }}>
+        <h2
+          style={{
+            fontSize: '12px',
+            color: THEME.TEXT_DIM,
+            fontWeight: 'normal',
+            letterSpacing: '4px',
+            margin: 0
+          }}
+        >
+          {pageTitle}
+        </h2>
+      </div>
+
+      {/* Right: User Info */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          position: 'relative'
+        }}
+      >
+        {/* Version Badge */}
+        <span
+          style={{
+            fontSize: '9px',
+            color: THEME.TEXT_MUTED,
+            letterSpacing: '1px',
+            padding: '4px 8px',
+            background: 'rgba(255,255,255,0.05)',
+            borderRadius: '3px'
+          }}
+        >
+          V2.1 + PKE
+        </span>
+
+        {/* User Button */}
+        <button
+          onClick={() => setShowUserMenu(!showUserMenu)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 12px',
+            background: 'transparent',
+            border: `1px solid ${THEME.BORDER}`,
+            borderRadius: '4px',
+            cursor: 'pointer',
+            transition: 'border-color 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.target.style.borderColor = THEME.TEXT_DIM}
+          onMouseLeave={(e) => e.target.style.borderColor = THEME.BORDER}
+        >
+          {/* Avatar */}
+          <div
+            style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              background: THEME.GRADIENT_BUTTON,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <span style={{ fontSize: '11px', color: '#000', fontWeight: 'bold' }}>
+              {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+            </span>
+          </div>
+          <span style={{ fontSize: '11px', color: THEME.TEXT_SECONDARY }}>
+            {user?.name || user?.email?.split('@')[0] || 'User'}
+          </span>
+          <span style={{ fontSize: '10px', color: THEME.TEXT_MUTED }}>▼</span>
+        </button>
+
+        {/* User Dropdown Menu */}
+        {showUserMenu && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: '8px',
+              background: THEME.BG_MEDIUM,
+              border: `1px solid ${THEME.BORDER}`,
+              borderRadius: '4px',
+              minWidth: '180px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              zIndex: 1000
+            }}
+          >
+            {/* User Info */}
+            <div
+              style={{
+                padding: '12px 16px',
+                borderBottom: `1px solid ${THEME.BORDER}`
+              }}
+            >
+              <div style={{ fontSize: '11px', color: THEME.TEXT_PRIMARY }}>
+                {user?.name || 'User'}
+              </div>
+              <div style={{ fontSize: '10px', color: THEME.TEXT_MUTED, marginTop: '2px' }}>
+                {user?.email || '---'}
+              </div>
+            </div>
+
+            {/* Menu Items */}
+            <div style={{ padding: '8px 0' }}>
+              <MenuButton label="Settings" icon="⚙️" onClick={() => setShowUserMenu(false)} />
+              <MenuButton label="Help" icon="❓" onClick={() => setShowUserMenu(false)} />
+              <div style={{ height: '1px', background: THEME.BORDER, margin: '8px 0' }} />
+              <MenuButton
+                label="Logout"
+                icon="🚪"
+                onClick={() => {
+                  setShowUserMenu(false)
+                  logout?.()
+                }}
+                danger
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Click outside to close menu */}
+      {showUserMenu && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 999
+          }}
+          onClick={() => setShowUserMenu(false)}
         />
-      </div>
+      )}
+    </div>
+  )
+}
 
-      {/* Main Title - centered horizontally, vertically aligned with logo center */}
-      <h1
+// ===========================================
+// Sub-components
+// ===========================================
+
+function MenuButton({ label, icon, onClick, danger }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '10px 16px',
+        background: 'transparent',
+        border: 'none',
+        cursor: 'pointer',
+        textAlign: 'left',
+        transition: 'background 0.2s ease'
+      }}
+      onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.05)'}
+      onMouseLeave={(e) => e.target.style.background = 'transparent'}
+    >
+      <span style={{ fontSize: '14px' }}>{icon}</span>
+      <span
         style={{
-          position: 'absolute',
-          left: '50%',
-          top: '40px',
-          transform: 'translate(-50%, -50%)',
-          fontFamily: THEME.FONT_PRIMARY,
-          fontSize: '24px',
-          fontWeight: 500,
-          color: '#f0f0f0',
-          letterSpacing: '0.15em',
-          whiteSpace: 'nowrap',
-          margin: 0
+          fontSize: '11px',
+          color: danger ? '#F44336' : THEME.TEXT_SECONDARY,
+          letterSpacing: '1px'
         }}
       >
-        PROMETHEUS COURSE GENERATION SYSTEM 2.0
-      </h1>
-
-      {/* Info Cluster - far right */}
-      <div
-        style={{
-          position: 'absolute',
-          right: '20px',
-          top: '15px',
-          textAlign: 'right',
-          fontFamily: THEME.FONT_MONO,
-          fontSize: '12px'
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', lineHeight: 1.4 }}>
-          <span style={{ color: '#888' }}>Course:</span>
-          <span style={{ color: hasValue(courseData.title) ? THEME.AMBER : '#888', minWidth: '80px' }}>
-            {hasValue(courseData.title) ? courseData.title : '---'}
-          </span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', lineHeight: 1.4 }}>
-          <span style={{ color: '#888' }}>Duration:</span>
-          <span style={{ color: hasValue(courseData.duration) ? THEME.AMBER : '#888', minWidth: '80px' }}>
-            {hasValue(courseData.duration) ? `${courseData.duration} ${courseData.durationUnit || ''}`.trim() : '---'}
-          </span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', lineHeight: 1.4 }}>
-          <span style={{ color: '#888' }}>Level:</span>
-          <span style={{ color: hasValue(courseData.level) ? THEME.AMBER : '#888', minWidth: '80px' }}>
-            {hasValue(courseData.level) ? courseData.level : '---'}
-          </span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', lineHeight: 1.4 }}>
-          <span style={{ color: '#888' }}>Thematic:</span>
-          <span style={{ color: hasValue(courseData.thematic) ? THEME.AMBER : '#888', minWidth: '80px' }}>
-            {hasValue(courseData.thematic) ? courseData.thematic : '---'}
-          </span>
-        </div>
-      </div>
-
-      {/* Horizontal Line at Y=85 */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '85px',
-          left: 0,
-          right: 0,
-          height: '1px',
-          background: 'linear-gradient(to right, transparent 0%, #444 10%, #444 90%, transparent 100%)'
-        }}
-      />
-
-      {/* Page Title - centered, Y=92 (7px below line) */}
-      <h2
-        style={{
-          position: 'absolute',
-          top: '92px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          fontFamily: THEME.FONT_PRIMARY,
-          fontSize: '18px',
-          fontWeight: 500,
-          color: '#f0f0f0',
-          letterSpacing: '0.1em',
-          margin: 0
-        }}
-      >
-        {pageTitle}
-      </h2>
-    </header>
+        {label}
+      </span>
+    </button>
   )
 }
 
 export default Header
+```
+
+---
+
+**Go to GitHub → Navigate to `src/components/Header.jsx`**
+- Click the **pencil icon** (edit)
+- **Select all** and **delete** existing content
+- Paste the code above
+- Click "Commit changes"
+
+---
+
+## ✅ NOW you're truly done with all 18 files!
+
+**Final step - create `.env` file:**
+
+In your local `prometheus-ui` folder, create a file named `.env` with:
+```
+VITE_API_URL=http://localhost:3001/api
