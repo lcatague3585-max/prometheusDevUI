@@ -1,195 +1,150 @@
-/**
- * Gating Middleware
- * Enforces PKE workflow gates and stage progression
- * 
- * Gate A: Authentication (handled by auth middleware)
- * Gate B: Course title saved (minimum course context)
- */
-
-const Course = require('../models/Course');
-
-/**
- * Gate B: Require course title to be saved
- * User must have saved a course title before accessing generation features
- */
-const requireGateB = async (req, res, next) => {
-  try {
-    const courseId = req.params.courseId || req.body.courseId;
-
-    if (!courseId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Course ID required',
-        gate: 'B',
-        code: 'NO_COURSE_ID'
-      });
-    }
-
-    const course = await Course.findById(courseId);
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        error: 'Course not found',
-        gate: 'B',
-        code: 'COURSE_NOT_FOUND'
-      });
-    }
-
-    // Check ownership or collaboration
-    const hasAccess = 
-      course.owner.toString() === req.user.id ||
-      course.collaborators.some(c => c.toString() === req.user.id);
-
-    if (!hasAccess) {
-      return res.status(403).json({
-        success: false,
-        error: 'Access denied to this course',
-        gate: 'B',
-        code: 'ACCESS_DENIED'
-      });
-    }
-
-    // Check Gate B: Title must be saved
-    if (!course.title || course.title.trim().length === 0) {
-      return res.status(403).json({
-        success: false,
-        error: 'Course title must be saved before proceeding',
-        gate: 'B',
-        code: 'GATE_B_FAILED',
-        hint: 'Save a course title first using PUT /api/courses/:id/title'
-      });
-    }
-
-    // Mark Gate B as passed if not already
-    if (!course.gates.gateB) {
-      course.gates.gateB = true;
-      await course.save();
-    }
-
-    // Attach course to request for downstream use
-    req.course = course;
-    next();
-
-  } catch (error) {
-    next(error);
+class GatingMiddleware {
+  constructor() {
+    this.gates = {
+      A: this.checkUserPermissions.bind(this),
+      B: this.checkRequestQuality.bind(this),
+      C: this.checkSystemLoad.bind(this)
+    };
   }
-};
 
-/**
- * Require specific invocation to be completed
- */
-const requireInvocation = (invocationNumber) => {
-  return async (req, res, next) => {
+  async checkUserPermissions(req) {
+    // Gate A: User authentication & permissions
+    if (!req.user) {
+      return { passed: false, reason: 'Authentication required' };
+    }
+
+    // Check user role/access
+    const userRole = req.user.role || 'user';
+    const allowedRoles = ['user', 'admin', 'premium'];
+    
+    if (!allowedRoles.includes(userRole)) {
+      return { passed: false, reason: 'Insufficient permissions' };
+    }
+
+    // Check usage limits (you'll need to implement this based on your DB)
+    const userUsage = await this.getUserUsage(req.user.id);
+    if (userUsage.dailyLimitExceeded) {
+      return { passed: false, reason: 'Daily limit exceeded' };
+    }
+
+    return { passed: true, grade: 'A' };
+  }
+
+  async checkRequestQuality(req) {
+    // Gate B: Validate request payload
+    const { invocationType, payload } = req.body;
+
+    if (!invocationType || !payload) {
+      return { passed: false, reason: 'Missing required fields' };
+    }
+
+    // Validate invocation type (1-5 based on your frontend)
+    const validTypes = [1, 2, 3, 4, 5];
+    if (!validTypes.includes(parseInt(invocationType))) {
+      return { passed: false, reason: 'Invalid invocation type' };
+    }
+
+    // Validate payload structure based on invocation type
+    const validationResult = this.validatePayloadByType(invocationType, payload);
+    if (!validationResult.valid) {
+      return { passed: false, reason: validationResult.error };
+    }
+
+    return { passed: true, grade: 'B' };
+  }
+
+  async checkSystemLoad(req) {
+    // Gate C: System health & rate limiting
+    // Implement rate limiting
+    const clientIP = req.ip;
+    const endpoint = req.path;
+    
+    if (await this.isRateLimited(clientIP, endpoint)) {
+      return { 
+        passed: false, 
+        reason: 'Rate limit exceeded',
+        retryAfter: 60
+      };
+    }
+
+    // Check system resources (simplified)
+    const systemLoad = process.memoryUsage().heapUsed / process.memoryUsage().heapTotal;
+    if (systemLoad > 0.85) {
+      return { passed: false, reason: 'System under high load' };
+    }
+
+    return { passed: true, grade: 'C' };
+  }
+
+  validatePayloadByType(type, payload) {
+    // Add your validation logic here
+    const validators = {
+      1: (p) => p.courseTitle && p.audience, // Course Blueprint
+      2: (p) => p.moduleTitle && p.learningObjectives, // Course Module
+      3: (p) => p.pathName && p.targetAudience, // Learning Path
+      4: (p) => p.assessmentType && p.questions, // Assessment
+      5: (p) => p.templateType && p.mapping // Template Mapping
+    };
+
+    const validator = validators[type];
+    if (!validator) {
+      return { valid: false, error: 'No validator for this type' };
+    }
+
+    return validator(payload) 
+      ? { valid: true }
+      : { valid: false, error: 'Invalid payload structure' };
+  }
+
+  async getUserUsage(userId) {
+    // Implement based on your database
+    // This is a placeholder
+    return { dailyLimitExceeded: false };
+  }
+
+  async isRateLimited(ip, endpoint) {
+    // Implement rate limiting logic
+    // Consider using express-rate-limit package
+    return false;
+  }
+
+  async gateRequest(req, res, next) {
     try {
-      const course = req.course;
+      const gateResults = {
+        A: await this.gates.A(req),
+        B: await this.gates.B(req),
+        C: await this.gates.C(req)
+      };
 
-      if (!course) {
-        return res.status(500).json({
-          success: false,
-          error: 'Course not loaded. Use requireGateB first.',
-        });
+      // Check if all gates passed
+      const allPassed = Object.values(gateResults).every(result => result.passed);
+      
+      if (!allPassed) {
+        const failedGates = Object.entries(gateResults)
+          .filter(([_, result]) => !result.passed)
+          .map(([gate, result]) => ({ gate, reason: result.reason }));
+
+        const error = new Error('Gating check failed');
+        error.status = 429;
+        error.gatingResults = {
+          passed: false,
+          failedGates,
+          details: gateResults
+        };
+        return next(error);
       }
 
-      const completed = course.completedInvocations.find(
-        inv => inv.invocation === invocationNumber
-      );
-
-      if (!completed) {
-        return res.status(403).json({
-          success: false,
-          error: `Invocation ${invocationNumber} must be completed first`,
-          code: 'INVOCATION_REQUIRED',
-          required: invocationNumber,
-          completed: course.completedInvocations.map(i => i.invocation),
-        });
-      }
+      // All gates passed, attach results to request
+      req.gatingResults = {
+        passed: true,
+        details: gateResults
+      };
 
       next();
     } catch (error) {
       next(error);
     }
-  };
-};
+  }
+}
 
-/**
- * Check stage progression
- * Ensures user follows the correct workflow order
- */
-const requireStage = (...allowedStages) => {
-  return async (req, res, next) => {
-    try {
-      const course = req.course;
-
-      if (!course) {
-        return res.status(500).json({
-          success: false,
-          error: 'Course not loaded',
-        });
-      }
-
-      if (!allowedStages.includes(course.currentStage)) {
-        return res.status(403).json({
-          success: false,
-          error: `This action requires stage: ${allowedStages.join(' or ')}`,
-          currentStage: course.currentStage,
-          allowedStages,
-          code: 'WRONG_STAGE'
-        });
-      }
-
-      next();
-    } catch (error) {
-      next(error);
-    }
-  };
-};
-
-/**
- * Invocation prerequisites mapping
- */
-const INVOCATION_PREREQUISITES = {
-  1: [],                    // Invocation 1 needs only Gate B
-  2: [1],                   // Invocation 2 needs Invocation 1
-  3: [1, 2],                // Invocation 3 needs 1 and 2
-  4: [1, 2, 3],             // Invocation 4 needs 1, 2, and 3
-  5: [],                    // Invocation 5 (admin) has no prerequisites
-};
-
-/**
- * Check invocation prerequisites
- */
-const checkInvocationPrereqs = (invocationNumber) => {
-  return async (req, res, next) => {
-    try {
-      const course = req.course;
-      const prereqs = INVOCATION_PREREQUISITES[invocationNumber] || [];
-
-      const completedNumbers = course.completedInvocations.map(i => i.invocation);
-      const missing = prereqs.filter(p => !completedNumbers.includes(p));
-
-      if (missing.length > 0) {
-        return res.status(403).json({
-          success: false,
-          error: `Complete invocation(s) ${missing.join(', ')} first`,
-          code: 'PREREQUISITES_NOT_MET',
-          required: prereqs,
-          completed: completedNumbers,
-          missing,
-        });
-      }
-
-      next();
-    } catch (error) {
-      next(error);
-    }
-  };
-};
-
-module.exports = {
-  requireGateB,
-  requireInvocation,
-  requireStage,
-  checkInvocationPrereqs,
-  INVOCATION_PREREQUISITES,
-};
+module.exports = new GatingMiddleware();
